@@ -1010,7 +1010,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                         }
 
                         if ($codebase->taint->hasPreviousSource($method_source, $suffixes)) {
-                            $return_type_candidate->tainted = 1;
+                            $return_type_candidate->tainted = Type\Union::TAINTED_ALL;
 
                             if ($suffixes !== null) {
                                 $specialized_sources = [];

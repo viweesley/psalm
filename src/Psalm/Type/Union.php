@@ -31,9 +31,17 @@ use function substr;
 
 class Union
 {
-    const TAINTED = 1;
-    const TAINTED_MYSQL_SAFE = 2;
-    const TAINTED_HTML_SAFE = 4;
+    const TAINTED_INPUT_SQL = 1;
+    const TAINTED_INPUT_HTML = 2;
+    const TAINTED_INPUT_SECRET = 4;
+    const TAINTED_INPUT_SHELL = 8;
+    const TAINTED_SYSTEM_SECRET = 16;
+
+    const TAINTED_ALL = self::TAINTED_INPUT_SQL
+        | self::TAINTED_INPUT_HTML
+        | self::TAINTED_INPUT_SECRET
+        | self::TAINTED_INPUT_SHELL
+        | self::TAINTED_SYSTEM_SECRET;
 
     /**
      * @var array<string, Atomic>
