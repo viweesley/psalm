@@ -581,7 +581,7 @@ class Reconciler
                             } else {
                                 if (substr($property_name, -2) === '()') {
                                     $method_id = new \Psalm\Internal\MethodIdentifier(
-                                        $existing_key_type_part->value,
+                                        strtolower($existing_key_type_part->value),
                                         strtolower(substr($property_name, 0, -2))
                                     );
 

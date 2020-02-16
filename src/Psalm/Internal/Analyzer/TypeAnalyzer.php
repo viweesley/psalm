@@ -605,7 +605,7 @@ class TypeAnalyzer
                         ) {
                             if (\substr($intersection_input_type->defining_class, 0, 3) !== 'fn-') {
                                 $input_class_storage = $codebase->classlike_storage_provider->get(
-                                    $intersection_input_type->defining_class
+                                    strtolower($intersection_input_type->defining_class)
                                 );
 
                                 if (isset($input_class_storage->template_type_extends
@@ -1439,7 +1439,7 @@ class TypeAnalyzer
             if ($codebase->classOrInterfaceExists($input_type_part->value)
                 && $codebase->methods->methodExists(
                     new \Psalm\Internal\MethodIdentifier(
-                        $input_type_part->value,
+                        strtolower($input_type_part->value),
                         '__tostring'
                     )
                 )
@@ -1490,7 +1490,7 @@ class TypeAnalyzer
                 || (
                     $input_type_part instanceof TNamedObject &&
                     $codebase->classOrInterfaceExists($input_type_part->value) &&
-                    $codebase->methodExists($input_type_part->value . '::__invoke')
+                    $codebase->methodExists(strtolower($input_type_part->value) . '::__invoke')
                 )
             )
         ) {
@@ -1637,7 +1637,7 @@ class TypeAnalyzer
                         true
                     );
 
-                    $class_storage = $codebase->classlike_storage_provider->get($property_declaring_class);
+                    $class_storage = $codebase->classlike_storage_provider->get(strtolower($property_declaring_class));
 
                     $input_property_storage = $class_storage->properties[$property_name];
 
@@ -1807,7 +1807,7 @@ class TypeAnalyzer
             && $codebase->classExists($input_type_part->value)
         ) {
             $invoke_id = new \Psalm\Internal\MethodIdentifier(
-                $input_type_part->value,
+                strtolower($input_type_part->value),
                 '__invoke'
             );
 
@@ -1899,7 +1899,7 @@ class TypeAnalyzer
         }
 
         return new \Psalm\Internal\MethodIdentifier(
-            $class_name,
+            strtolower($class_name),
             strtolower($method_name)
         );
     }
@@ -1918,7 +1918,7 @@ class TypeAnalyzer
                 if ($input_type_part instanceof TNamedObject
                     && $codebase->classExists($input_type_part->value)
                 ) {
-                    $class_storage = $codebase->classlike_storage_provider->get($input_type_part->value);
+                    $class_storage = $codebase->classlike_storage_provider->get(strtolower($input_type_part->value));
 
                     $container_class = $container_type_part->value;
 
@@ -1964,8 +1964,12 @@ class TypeAnalyzer
             $container_type_params_covariant = [];
 
             try {
-                $input_class_storage = $codebase->classlike_storage_provider->get($input_type_part->value);
-                $container_class_storage = $codebase->classlike_storage_provider->get($container_type_part->value);
+                $input_class_storage = $codebase->classlike_storage_provider->get(
+                    strtolower($input_type_part->value)
+                );
+                $container_class_storage = $codebase->classlike_storage_provider->get(
+                    strtolower($container_type_part->value)
+                );
                 $container_type_params_covariant = $container_class_storage->template_covariants;
             } catch (\Throwable $e) {
                 $input_class_storage = null;

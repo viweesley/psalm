@@ -5,6 +5,7 @@ use PhpParser;
 use Psalm\CodeLocation;
 use Psalm\Issue\UndefinedInterface;
 use UnexpectedValueException;
+use function strtolower;
 
 /**
  * @internal
@@ -51,7 +52,9 @@ class InterfaceAnalyzer extends ClassLikeAnalyzer
                 }
 
                 try {
-                    $extended_interface_storage = $codebase->classlike_storage_provider->get($extended_interface_name);
+                    $extended_interface_storage = $codebase->classlike_storage_provider->get(
+                        strtolower($extended_interface_name)
+                    );
                 } catch (\InvalidArgumentException $e) {
                     continue;
                 }
@@ -93,7 +96,7 @@ class InterfaceAnalyzer extends ClassLikeAnalyzer
             throw new \UnexpectedValueException('bad');
         }
 
-        $class_storage = $codebase->classlike_storage_provider->get($fq_interface_name);
+        $class_storage = $codebase->classlike_storage_provider->get(strtolower($fq_interface_name));
 
         foreach ($this->class->stmts as $stmt) {
             if ($stmt instanceof PhpParser\Node\Stmt\ClassMethod) {
@@ -101,7 +104,7 @@ class InterfaceAnalyzer extends ClassLikeAnalyzer
 
                 $type_provider = new \Psalm\Internal\Provider\NodeDataProvider();
 
-                $method_analyzer->analyze(new \Psalm\Context($this->getFQCLN()), $type_provider);
+                $method_analyzer->analyze(new \Psalm\Context(strtolower($this->getFQCLN())), $type_provider);
 
                 $actual_method_id = $method_analyzer->getMethodId();
 

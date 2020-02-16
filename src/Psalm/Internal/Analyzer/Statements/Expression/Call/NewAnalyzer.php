@@ -330,7 +330,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
             if (strtolower($fq_class_name) !== 'stdclass' &&
                 $codebase->classlikes->classExists($fq_class_name)
             ) {
-                $storage = $codebase->classlike_storage_provider->get($fq_class_name);
+                $storage = $codebase->classlike_storage_provider->get(strtolower($fq_class_name));
 
                 // if we're not calling this constructor via new static()
                 if ($storage->abstract && !$can_extend) {
@@ -345,7 +345,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                     }
                 }
 
-                if ($storage->deprecated && strtolower($fq_class_name) !== strtolower((string) $context->self)) {
+                if ($storage->deprecated && strtolower($fq_class_name) !== $context->self) {
                     if (IssueBuffer::accepts(
                         new DeprecatedClass(
                             $fq_class_name . ' is marked deprecated',
@@ -389,7 +389,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                     }
                 }
 
-                $method_id = new \Psalm\Internal\MethodIdentifier($fq_class_name, '__construct');
+                $method_id = new \Psalm\Internal\MethodIdentifier(strtolower($fq_class_name), '__construct');
 
                 if ($codebase->methods->methodExists(
                     $method_id,
@@ -461,6 +461,12 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         $declaring_fq_class_name = $declaring_method_id
                             ? $declaring_method_id->fq_class_name
                             : $fq_class_name;
+
+                        $declaring_class_storage = $codebase->classlike_storage_provider->get(
+                            strtolower($declaring_fq_class_name)
+                        );
+
+                        $declaring_fq_class_name = $declaring_class_storage->name;
 
                         foreach ($storage->template_types as $template_name => $base_type) {
                             if (isset($template_result->generic_params[$template_name][$fq_class_name])) {

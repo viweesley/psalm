@@ -300,6 +300,7 @@ class ClassLikes
 
     /**
      * @param string $fq_class_name
+     * @param lowercase-string $calling_fq_class_name
      *
      * @return bool
      */
@@ -368,6 +369,7 @@ class ClassLikes
 
     /**
      * @param string $fq_class_name
+     * @param lowercase-string $calling_fq_class_name
      *
      * @return bool
      */
@@ -468,6 +470,7 @@ class ClassLikes
      *
      * @param  string          $fq_class_name
      * @param  CodeLocation $code_location
+     * @param  lowercase-string $calling_fq_class_name
      *
      * @return bool
      */
@@ -489,6 +492,7 @@ class ClassLikes
      * Determine whether or not a given class exists
      *
      * @param  string       $fq_class_name
+     * @param  lowercase-string $calling_fq_class_name
      *
      * @return bool
      */
@@ -528,6 +532,8 @@ class ClassLikes
         }
 
         $fq_class_name = $this->classlike_aliases[$fq_class_name_lc] ?? $fq_class_name;
+
+        $fq_class_name_lc = strtolower($fq_class_name);
 
         $class_storage = $this->classlike_storage_provider->get($fq_class_name_lc);
 
@@ -571,7 +577,7 @@ class ClassLikes
         }
 
         if (isset($this->classlike_aliases[$fq_class_name])) {
-            $fq_class_name = $this->classlike_aliases[$fq_class_name];
+            $fq_class_name = strtolower($this->classlike_aliases[$fq_class_name]);
         }
 
         $class_storage = $this->classlike_storage_provider->get($fq_class_name);
@@ -581,6 +587,7 @@ class ClassLikes
 
     /**
      * @param  string         $fq_interface_name
+     * @param  lowercase-string $calling_fq_class_name
      *
      * @return bool
      */
@@ -755,6 +762,7 @@ class ClassLikes
     }
 
     /**
+     * @param lowercase-string $alias_name_lc
      * @return string
      */
     public function getUnAliasedName(string $alias_name)
@@ -846,7 +854,7 @@ class ClassLikes
             list($destination_fq_class_name, $destination_name) = explode('::', $destination);
 
             try {
-                $classlike_storage = $this->classlike_storage_provider->get($destination_fq_class_name);
+                $classlike_storage = $this->classlike_storage_provider->get(strtolower($destination_fq_class_name));
             } catch (\InvalidArgumentException $e) {
                 continue;
             }
@@ -926,8 +934,12 @@ class ClassLikes
             list($source_fq_class_name) = explode('::$', $source);
             list($destination_fq_class_name, $destination_name) = explode('::$', $destination);
 
-            $source_classlike_storage = $this->classlike_storage_provider->get($source_fq_class_name);
-            $destination_classlike_storage = $this->classlike_storage_provider->get($destination_fq_class_name);
+            $source_classlike_storage = $this->classlike_storage_provider->get(
+                strtolower($source_fq_class_name)
+            );
+            $destination_classlike_storage = $this->classlike_storage_provider->get(
+                strtolower($destination_fq_class_name)
+            );
 
             if ($destination_classlike_storage->stmt_location
                 && $this->config->isInProjectDirs($destination_classlike_storage->stmt_location->file_path)
@@ -1021,8 +1033,12 @@ class ClassLikes
             list($source_fq_class_name, $source_const_name) = explode('::', $source);
             list($destination_fq_class_name, $destination_name) = explode('::', $destination);
 
-            $source_classlike_storage = $this->classlike_storage_provider->get($source_fq_class_name);
-            $destination_classlike_storage = $this->classlike_storage_provider->get($destination_fq_class_name);
+            $source_classlike_storage = $this->classlike_storage_provider->get(
+                strtolower($source_fq_class_name)
+            );
+            $destination_classlike_storage = $this->classlike_storage_provider->get(
+                strtolower($destination_fq_class_name)
+            );
 
             $source_const_stmt_location = $source_classlike_storage->class_constant_stmt_locations[$source_const_name];
             $source_const_location = $source_classlike_storage->class_constant_locations[$source_const_name];
@@ -1388,7 +1404,7 @@ class ClassLikes
         $project_analyzer = \Psalm\Internal\Analyzer\ProjectAnalyzer::getInstance();
         $codebase = $project_analyzer->getCodebase();
 
-        $destination_class_storage = $codebase->classlike_storage_provider->get($destination_fq_class_name);
+        $destination_class_storage = $codebase->classlike_storage_provider->get(strtolower($destination_fq_class_name));
 
         if (!$destination_class_storage->aliases) {
             throw new \UnexpectedValueException('Aliases should not be null');
@@ -1424,7 +1440,9 @@ class ClassLikes
         $project_analyzer = \Psalm\Internal\Analyzer\ProjectAnalyzer::getInstance();
         $codebase = $project_analyzer->getCodebase();
 
-        $destination_class_storage = $codebase->classlike_storage_provider->get($destination_fq_class_name);
+        $destination_class_storage = $codebase->classlike_storage_provider->get(
+            strtolower($destination_fq_class_name)
+        );
 
         if (!$destination_class_storage->aliases) {
             throw new \UnexpectedValueException('Aliases should not be null');
@@ -1763,7 +1781,7 @@ class ClassLikes
         Type\Union $type,
         $visibility
     ) {
-        $storage = $this->classlike_storage_provider->get($class_name);
+        $storage = $this->classlike_storage_provider->get(strtolower($class_name));
 
         if ($visibility === ReflectionProperty::IS_PUBLIC) {
             $storage->public_class_constants[$const_name] = $type;
@@ -1785,7 +1803,7 @@ class ClassLikes
         foreach ($classlike_storage->appearing_method_ids as $method_name => $appearing_method_id) {
             $appearing_fq_classlike_name = $appearing_method_id->fq_class_name;
 
-            if ($appearing_fq_classlike_name !== $classlike_storage->name) {
+            if ($appearing_fq_classlike_name !== strtolower($classlike_storage->name)) {
                 continue;
             }
 
@@ -1818,9 +1836,7 @@ class ClassLikes
                 continue;
             }
 
-            $method_referenced = $this->file_reference_provider->isClassMethodReferenced(
-                strtolower((string) $method_id)
-            );
+            $method_referenced = $this->file_reference_provider->isClassMethodReferenced((string) $method_id);
 
             if (!$method_referenced
                 && (substr($method_name, 0, 2) !== '__' || $method_name === '__construct')
@@ -1855,7 +1871,7 @@ class ClassLikes
                             }
 
                             $parent_method_referenced = $this->file_reference_provider->isClassMethodReferenced(
-                                strtolower((string) $parent_method_id)
+                                (string) $parent_method_id
                             );
 
                             if (!$parent_method_storage->abstract || $parent_method_referenced) {
@@ -1970,10 +1986,7 @@ class ClassLikes
                     && !$classlike_storage->is_interface
                 ) {
                     foreach ($method_storage->params as $offset => $param_storage) {
-                        if (!$this->file_reference_provider->isMethodParamUsed(
-                            strtolower((string) $method_id),
-                            $offset
-                        )
+                        if (!$this->file_reference_provider->isMethodParamUsed((string) $method_id, $offset)
                             && $param_storage->location
                         ) {
                             if (IssueBuffer::accepts(
@@ -2003,7 +2016,7 @@ class ClassLikes
         foreach ($classlike_storage->appearing_method_ids as $method_name => $appearing_method_id) {
             $appearing_fq_classlike_name = $appearing_method_id->fq_class_name;
 
-            if ($appearing_fq_classlike_name !== $classlike_storage->name) {
+            if ($appearing_fq_classlike_name !== strtolower($classlike_storage->name)) {
                 continue;
             }
 
@@ -2040,7 +2053,7 @@ class ClassLikes
                 continue;
             }
 
-            $method_id_lc = strtolower((string) $method_id);
+            $method_id_lc = (string) $method_id;
 
             if (isset($codebase->analyzer->possible_method_param_types[$method_id_lc])) {
                 if ($method_storage->location) {

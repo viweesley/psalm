@@ -32,6 +32,7 @@ use function strpos;
 use function strval;
 use function substr;
 use Doctrine\Instantiator\Exception\UnexpectedValueException;
+use function strtolower;
 
 class Union
 {
@@ -80,7 +81,7 @@ class Union
     /**
      * Which class the type was initialised in
      *
-     * @var ?string
+     * @var ?lowercase-string
      */
     public $initialized_class = null;
 
@@ -1164,7 +1165,9 @@ class Union
                             }
 
                             try {
-                                $classlike_storage = $codebase->classlike_storage_provider->get($template_class);
+                                $classlike_storage = $codebase->classlike_storage_provider->get(
+                                    strtolower($template_class)
+                                );
 
                                 if ($classlike_storage->template_type_extends) {
                                     $defining_class = $atomic_type->defining_class;

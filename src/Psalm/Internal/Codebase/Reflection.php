@@ -120,9 +120,9 @@ class Reflection
                 $storage->properties[$property_name]->visibility = ClassLikeAnalyzer::VISIBILITY_PRIVATE;
             }
 
-            $property_id = (string)$class_property->class . '::$' . $property_name;
+            $property_id = strtolower((string)$class_property->class) . '::$' . $property_name;
 
-            $storage->declaring_property_ids[$property_name] = (string)$class_property->class;
+            $storage->declaring_property_ids[$property_name] = strtolower((string)$class_property->class);
             $storage->appearing_property_ids[$property_name] = $property_id;
 
             if (!$class_property->isPrivate()) {
@@ -136,9 +136,9 @@ class Reflection
                 $storage->properties[$property_name] = new PropertyStorage();
                 $storage->properties[$property_name]->visibility = ClassLikeAnalyzer::VISIBILITY_PUBLIC;
 
-                $property_id = $class_name . '::$' . $property_name;
+                $property_id = strtolower($class_name) . '::$' . $property_name;
 
-                $storage->declaring_property_ids[$property_name] = $class_name;
+                $storage->declaring_property_ids[$property_name] = strtolower($class_name);
                 $storage->appearing_property_ids[$property_name] = $property_id;
                 $storage->inheritable_property_ids[$property_name] = $property_id;
             }
@@ -196,17 +196,17 @@ class Reflection
                 && ($class_name !== 'SoapFault' || $reflection_method->name !== '__construct')
             ) {
                 $reflection_method_name = strtolower($reflection_method->name);
-                $reflection_method_class = $reflection_method->class;
+                $reflection_method_class = strtolower($reflection_method->class);
 
                 $this->codebase->methods->setDeclaringMethodId(
-                    $class_name,
+                    $class_name_lower,
                     $reflection_method_name,
                     $reflection_method_class,
                     $reflection_method_name
                 );
 
                 $this->codebase->methods->setAppearingMethodId(
-                    $class_name,
+                    $class_name_lower,
                     $reflection_method_name,
                     $reflection_method_class,
                     $reflection_method_name
@@ -224,9 +224,7 @@ class Reflection
     {
         $method_name_lc = strtolower($method->getName());
 
-        $fq_class_name = $method->class;
-
-        $fq_class_name_lc = strtolower($fq_class_name);
+        $fq_class_name_lc = strtolower($method->class);
 
         $class_storage = $this->storage_provider->get($fq_class_name_lc);
 
@@ -243,15 +241,15 @@ class Reflection
 
         if ($method_name_lc === $fq_class_name_lc) {
             $this->codebase->methods->setDeclaringMethodId(
-                $fq_class_name,
+                $fq_class_name_lc,
                 '__construct',
-                $fq_class_name,
+                $fq_class_name_lc,
                 $method_name_lc
             );
             $this->codebase->methods->setAppearingMethodId(
-                $fq_class_name,
+                $fq_class_name_lc,
                 '__construct',
-                $fq_class_name,
+                $fq_class_name_lc,
                 $method_name_lc
             );
         }
@@ -265,7 +263,7 @@ class Reflection
         $declaring_method_id = $declaring_class->name . '::' . $method_name_lc;
 
         $class_storage->declaring_method_ids[$method_name_lc] = new \Psalm\Internal\MethodIdentifier(
-            $declaring_class->name,
+            strtolower($declaring_class->name),
             $method_name_lc
         );
 
@@ -425,8 +423,8 @@ class Reflection
     }
 
     /**
-     * @param string $fq_class_name
-     * @param string $parent_class
+     * @param lowercase-string $fq_class_name
+     * @param lowercase-string $parent_class
      *
      * @return void
      */
@@ -486,7 +484,7 @@ class Reflection
                 continue;
             }
 
-            $storage->declaring_property_ids[$property_name] = strtolower($declaring_property_class);
+            $storage->declaring_property_ids[$property_name] = $declaring_property_class;
         }
 
         // register where they're declared

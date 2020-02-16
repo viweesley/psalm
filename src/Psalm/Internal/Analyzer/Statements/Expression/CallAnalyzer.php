@@ -85,6 +85,7 @@ class CallAnalyzer
         Context $context
     ) {
         $fq_class_name = (string)$source->getFQCLN();
+        $fq_class_name_lc = strtolower($fq_class_name);
 
         $project_analyzer = $source->getFileAnalyzer()->project_analyzer;
         $codebase = $source->getCodebase();
@@ -92,15 +93,15 @@ class CallAnalyzer
         if ($context->collect_mutations &&
             $context->self &&
             (
-                $context->self === $fq_class_name ||
-                $codebase->classExtends(
+                $context->self === $fq_class_name_lc
+                || $codebase->classExtends(
                     $context->self,
                     $fq_class_name
                 )
             )
         ) {
             $method_id = new \Psalm\Internal\MethodIdentifier(
-                $fq_class_name,
+                $fq_class_name_lc,
                 strtolower($method_name)
             );
 
@@ -127,7 +128,7 @@ class CallAnalyzer
         } elseif ($context->collect_initializations &&
             $context->self &&
             (
-                $context->self === $fq_class_name
+                $context->self === $fq_class_name_lc
                 || $codebase->classlikes->classExtends(
                     $context->self,
                     $fq_class_name
@@ -135,7 +136,7 @@ class CallAnalyzer
             ) &&
             $source->getMethodName() !== $method_name
         ) {
-            $method_id = new \Psalm\Internal\MethodIdentifier($fq_class_name, strtolower($method_name));
+            $method_id = new \Psalm\Internal\MethodIdentifier($fq_class_name_lc, strtolower($method_name));
 
             $declaring_method_id = $codebase->methods->getDeclaringMethodId($method_id);
 
@@ -148,7 +149,7 @@ class CallAnalyzer
                             $fq_class_name = $atomic_type->value;
 
                             $method_id = new \Psalm\Internal\MethodIdentifier(
-                                $fq_class_name,
+                                strtolower($fq_class_name),
                                 strtolower($method_name)
                             );
 
@@ -168,7 +169,7 @@ class CallAnalyzer
                             if ($intersection_type instanceof TNamedObject) {
                                 $fq_class_name = $intersection_type->value;
                                 $method_id = new \Psalm\Internal\MethodIdentifier(
-                                    $fq_class_name,
+                                    strtolower($fq_class_name),
                                     strtolower($method_name)
                                 );
 
@@ -1502,8 +1503,8 @@ class CallAnalyzer
     }
 
     /**
-     * @param  ?string $self_fq_class_name
-     * @param  ?string $static_fq_class_name
+     * @param  ?lowercase-string $self_fq_class_name
+     * @param  ?lowercase-string $static_fq_class_name
      * @param  array<string, array<string, array{Type\Union, 1?:int}>> $class_generic_params
      * @return false|null
      */
@@ -1746,8 +1747,8 @@ class CallAnalyzer
     }
 
     /**
-     * @param  ?string $self_fq_class_name
-     * @param  ?string $static_fq_class_name
+     * @param  ?lowercase-string $self_fq_class_name
+     * @param  ?lowercase-string $static_fq_class_name
      * @param  array<string, array<string, array{Type\Union, 1?:int}>> $class_generic_params
      * @param  array<string, array<string, array{Type\Union, 1?:int}>> $generic_params
      * @param  array<string, array<string, array{Type\Union}>> $template_types
@@ -2191,7 +2192,7 @@ class CallAnalyzer
                         }
 
                         $function_id_part = new \Psalm\Internal\MethodIdentifier(
-                            $callable_fq_class_name,
+                            strtolower($callable_fq_class_name),
                             $method_name
                         );
 
@@ -2527,13 +2528,11 @@ class CallAnalyzer
                 && strpos($cased_method_id, '::')
                 && !strpos($cased_method_id, '__')
             ) {
-                $method_parts = explode('::', $cased_method_id);
-
-                $method_id = new \Psalm\Internal\MethodIdentifier($method_parts[0], strtolower($method_parts[1]));
+                $method_id = new \Psalm\Internal\MethodIdentifier(...explode('::', strtolower($cased_method_id)));
                 $declaring_method_id = $codebase->methods->getDeclaringMethodId($method_id);
 
                 if ($declaring_method_id) {
-                    $id_lc = strtolower((string) $declaring_method_id);
+                    $id_lc = (string) $declaring_method_id;
                     if (!isset($codebase->analyzer->possible_method_param_types[$id_lc][$argument_offset])) {
                         $codebase->analyzer->possible_method_param_types[$id_lc][$argument_offset]
                             = clone $input_type;
@@ -2715,7 +2714,7 @@ class CallAnalyzer
                 ) {
                     $parts = explode('::', $input_type_part->value);
                     $potential_method_ids[] = new \Psalm\Internal\MethodIdentifier(
-                        $parts[0],
+                        strtolower($parts[0]),
                         strtolower($parts[1])
                     );
                 }
@@ -2924,12 +2923,12 @@ class CallAnalyzer
                                 }
 
                                 $function_id_part = new \Psalm\Internal\MethodIdentifier(
-                                    $callable_fq_class_name,
+                                    strtolower($callable_fq_class_name),
                                     strtolower($method_name)
                                 );
 
                                 $call_method_id = new \Psalm\Internal\MethodIdentifier(
-                                    $callable_fq_class_name,
+                                    strtolower($callable_fq_class_name),
                                     '__call'
                                 );
 
@@ -3100,7 +3099,7 @@ class CallAnalyzer
 
                     $method_name = strtolower($method_name_parts[0]);
 
-                    $class_storage = $codebase->classlike_storage_provider->get($fq_classlike_name);
+                    $class_storage = $codebase->classlike_storage_provider->get(strtolower($fq_classlike_name));
 
                     foreach ($class_storage->dependent_classlikes as $dependent_classlike_lc => $_) {
                         $dependent_classlike_storage = $codebase->classlike_storage_provider->get(

@@ -421,7 +421,7 @@ class PropertyFetchAnalyzer
             if (!$codebase->classExists($lhs_type_part->value)) {
                 if ($codebase->interfaceExists($lhs_type_part->value)) {
                     $interface_exists = true;
-                    $interface_storage = $codebase->classlike_storage_provider->get($lhs_type_part->value);
+                    $interface_storage = $codebase->classlike_storage_provider->get(strtolower($lhs_type_part->value));
 
                     $override_property_visibility = $interface_storage->override_property_visibility;
 
@@ -486,7 +486,7 @@ class PropertyFetchAnalyzer
 
             $property_id = $fq_class_name . '::$' . $prop_name;
 
-            $get_method_id = new \Psalm\Internal\MethodIdentifier($fq_class_name, '__get');
+            $get_method_id = new \Psalm\Internal\MethodIdentifier(strtolower($fq_class_name), '__get');
             if ($codebase->methods->methodExists($get_method_id)
                 && (!$codebase->properties->propertyExists($property_id, true, $statements_analyzer, $context)
                     || ($stmt_var_id !== '$this'
@@ -503,7 +503,7 @@ class PropertyFetchAnalyzer
             ) {
                 $has_magic_getter = true;
 
-                $class_storage = $codebase->classlike_storage_provider->get($fq_class_name);
+                $class_storage = $codebase->classlike_storage_provider->get(strtolower($fq_class_name));
 
                 if (isset($class_storage->pseudo_property_get_types['$' . $prop_name])) {
                     $stmt_type = clone $class_storage->pseudo_property_get_types['$' . $prop_name];
@@ -605,7 +605,7 @@ class PropertyFetchAnalyzer
                 );
             }
 
-            $class_storage = $codebase->classlike_storage_provider->get($fq_class_name);
+            $class_storage = $codebase->classlike_storage_provider->get(strtolower($fq_class_name));
             $config = $statements_analyzer->getProjectAnalyzer()->getConfig();
 
             if (!$codebase->properties->propertyExists(
@@ -627,7 +627,7 @@ class PropertyFetchAnalyzer
                     continue;
                 }
 
-                if ($fq_class_name !== $context->self
+                if (strtolower($fq_class_name) !== $context->self
                     && $context->self
                     && $codebase->properties->propertyExists(
                         $context->self . '::$' . $prop_name,
@@ -715,7 +715,7 @@ class PropertyFetchAnalyzer
             }
 
             if ($codebase->properties_to_rename) {
-                $declaring_property_id = strtolower($declaring_property_class) . '::$' . $prop_name;
+                $declaring_property_id = $declaring_property_class . '::$' . $prop_name;
 
                 foreach ($codebase->properties_to_rename as $original_property_id => $new_property_name) {
                     if ($declaring_property_id === $original_property_id) {
@@ -1188,7 +1188,7 @@ class PropertyFetchAnalyzer
             return false;
         }
 
-        $declaring_property_id = strtolower($declaring_property_class) . '::$' . $prop_name;
+        $declaring_property_id = (string) $declaring_property_class . '::$' . $prop_name;
 
         if ($codebase->alter_code && $stmt->class instanceof PhpParser\Node\Name) {
             $moved_class = $codebase->classlikes->handleClassLikeReferenceInMigration(

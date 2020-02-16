@@ -129,7 +129,7 @@ class Methods
         if (isset($class_storage->declaring_method_ids[$method_name])) {
             $declaring_method_id = $class_storage->declaring_method_ids[$method_name];
 
-            if ((string) $calling_function_id === strtolower((string) $declaring_method_id)) {
+            if ((string) $calling_function_id === (string) $declaring_method_id) {
                 return true;
             }
 
@@ -154,12 +154,12 @@ class Methods
                 if ($calling_function_id) {
                     $this->file_reference_provider->addMethodReferenceToClassMember(
                         $calling_function_id,
-                        strtolower((string) $declaring_method_id)
+                        (string) $declaring_method_id
                     );
                 } elseif ($file_path) {
                     $this->file_reference_provider->addFileReferenceToClassMember(
                         $file_path,
-                        strtolower((string) $declaring_method_id)
+                        (string) $declaring_method_id
                     );
                 }
             }
@@ -167,7 +167,7 @@ class Methods
             if ($this->collect_locations && $code_location) {
                 $this->file_reference_provider->addCallingLocationForClassMethod(
                     $code_location,
-                    strtolower((string) $declaring_method_id)
+                    (string) $declaring_method_id
                 );
             }
 
@@ -206,7 +206,7 @@ class Methods
                     if ($this->collect_locations && $code_location) {
                         $this->file_reference_provider->addCallingLocationForClassMethod(
                             $code_location,
-                            strtolower((string) $overridden_method_id)
+                            (string) $overridden_method_id
                         );
                     }
 
@@ -214,12 +214,12 @@ class Methods
                         // also store failures in case the method is added later
                         $this->file_reference_provider->addMethodReferenceToClassMember(
                             $calling_function_id,
-                            strtolower((string) $overridden_method_id)
+                            (string) $overridden_method_id
                         );
                     } elseif ($file_path) {
                         $this->file_reference_provider->addFileReferenceToClassMember(
                             $file_path,
-                            strtolower((string) $overridden_method_id)
+                            (string) $overridden_method_id
                         );
                     }
                 }
@@ -266,12 +266,12 @@ class Methods
             // also store failures in case the method is added later
             $this->file_reference_provider->addMethodReferenceToMissingClassMember(
                 $calling_function_id,
-                strtolower((string) $method_id)
+                (string) $method_id
             );
         } elseif ($file_path) {
             $this->file_reference_provider->addFileReferenceToMissingClassMember(
                 $file_path,
-                strtolower((string) $method_id)
+                (string) $method_id
             );
         }
 
@@ -435,7 +435,11 @@ class Methods
         string $appearing_fq_class_name,
         string $base_fq_class_name
     ) : Type\Union {
-        $class_storage = $codebase->classlike_storage_provider->get($appearing_fq_class_name);
+        $class_storage = $codebase->classlike_storage_provider->get(strtolower($appearing_fq_class_name));
+        $calling_class_storage = $codebase->classlike_storage_provider->get(strtolower($base_fq_class_name));
+        $appearing_fq_class_name = $class_storage->name;
+        $base_fq_class_name = $calling_class_storage->name;
+
         $extends = $class_storage->template_type_extends;
 
         if (!$extends) {
@@ -549,6 +553,7 @@ class Methods
         $original_fq_class_name = $method_id->fq_class_name;
         $original_method_name = $method_id->method_name;
 
+
         $adjusted_fq_class_name = $this->classlikes->getUnAliasedName($original_fq_class_name);
 
         if ($adjusted_fq_class_name !== $original_fq_class_name) {
@@ -609,11 +614,11 @@ class Methods
 
                     if ($atomic_type instanceof Type\Atomic\TNamedObject
                         && $this->methodExists(
-                            new \Psalm\Internal\MethodIdentifier($atomic_type->value, '__invoke')
+                            new \Psalm\Internal\MethodIdentifier(strtolower($atomic_type->value), '__invoke')
                         )
                     ) {
                         $invokable_storage = $this->getStorage(
-                            new \Psalm\Internal\MethodIdentifier($atomic_type->value, '__invoke')
+                            new \Psalm\Internal\MethodIdentifier(strtolower($atomic_type->value), '__invoke')
                         );
 
                         return new Type\Union([new Type\Atomic\TFn(
@@ -775,45 +780,45 @@ class Methods
     }
 
     /**
-     * @param string $fq_class_name
+     * @param lowercase-string $fq_class_name_lc
      * @param lowercase-string $method_name_lc
-     * @param string $declaring_fq_class_name
+     * @param lowercase-string $declaring_fq_class_name_lc
      * @param lowercase-string $declaring_method_name_lc
      *
      * @return void
      */
     public function setDeclaringMethodId(
-        $fq_class_name,
+        $fq_class_name_lc,
         $method_name_lc,
-        $declaring_fq_class_name,
+        $declaring_fq_class_name_lc,
         $declaring_method_name_lc
     ) {
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get($fq_class_name_lc);
 
         $class_storage->declaring_method_ids[$method_name_lc] = new \Psalm\Internal\MethodIdentifier(
-            $declaring_fq_class_name,
+            $declaring_fq_class_name_lc,
             $declaring_method_name_lc
         );
     }
 
     /**
-     * @param string $fq_class_name
+     * @param lowercase-string $fq_class_name_lc
      * @param lowercase-string $method_name_lc
-     * @param string $appearing_fq_class_name
+     * @param lowercase-string $appearing_fq_class_name_lc
      * @param lowercase-string $appearing_method_name_lc
      *
      * @return void
      */
     public function setAppearingMethodId(
-        $fq_class_name,
+        $fq_class_name_lc,
         $method_name_lc,
-        $appearing_fq_class_name,
+        $appearing_fq_class_name_lc,
         $appearing_method_name_lc
     ) {
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get($fq_class_name_lc);
 
         $class_storage->appearing_method_ids[$method_name_lc] = new \Psalm\Internal\MethodIdentifier(
-            $appearing_fq_class_name,
+            $appearing_fq_class_name_lc,
             $appearing_method_name_lc
         );
     }
@@ -823,7 +828,7 @@ class Methods
     ) : ?\Psalm\Internal\MethodIdentifier {
         $fq_class_name = $this->classlikes->getUnAliasedName($method_id->fq_class_name);
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         $method_name = $method_id->method_name;
 
@@ -846,7 +851,7 @@ class Methods
     ) : ?\Psalm\Internal\MethodIdentifier {
         $fq_class_name = $this->classlikes->getUnAliasedName($method_id->fq_class_name);
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         $method_name = $method_id->method_name;
 
@@ -880,24 +885,18 @@ class Methods
         $method_id = $this->getDeclaringMethodId($original_method_id);
 
         if ($method_id === null) {
-            return $original_method_id;
+            return (string) $original_method_id;
         }
-
-        $fq_class_name = $method_id->fq_class_name;
-        $new_method_name = $method_id->method_name;
-
-        $old_fq_class_name = $original_method_id->fq_class_name;
-        $old_method_name = $original_method_id->method_name;
 
         $storage = $this->getStorage($method_id);
 
-        if ($old_method_name === $new_method_name
-            && strtolower($old_fq_class_name) !== $old_fq_class_name
-        ) {
-            return $old_fq_class_name . '::' . $storage->cased_name;
+        if ($method_id->fq_class_name !== $original_method_id->fq_class_name) {
+            $class_storage = $this->classlike_storage_provider->get($original_method_id->fq_class_name);
+        } else {
+            $class_storage = $this->classlike_storage_provider->get($method_id->fq_class_name);
         }
 
-        return $fq_class_name . '::' . $storage->cased_name;
+        return $class_storage->name . '::' . $storage->cased_name;
     }
 
     /**

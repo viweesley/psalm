@@ -981,7 +981,7 @@ class ExpressionAnalyzer
                     : implode('\\', $stmt->class->parts);
             }
 
-            return $fq_class_name . '::$' . $stmt->name->name;
+            return strtolower($fq_class_name) . '::$' . $stmt->name->name;
         }
 
         if ($stmt instanceof PhpParser\Node\Expr\PropertyFetch && $stmt->name instanceof PhpParser\Node\Identifier) {
@@ -1135,7 +1135,7 @@ class ExpressionAnalyzer
                     $resolved_name = $this_class_name;
                 }
 
-                return $resolved_name . '::' . $stmt->name;
+                return strtolower($resolved_name) . '::' . $stmt->name;
             }
         }
 
@@ -1270,7 +1270,10 @@ class ExpressionAnalyzer
                     }
 
                     if (is_string($static_class_type)) {
-                        $return_type->value = $static_class_type;
+                        if ($static_class_type !== 'static') {
+                            $class_storage = $codebase->classlike_storage_provider->get(strtolower($static_class_type));
+                            $return_type->value = $class_storage->name;
+                        }
                     } else {
                         if ($return_type instanceof Type\Atomic\TGenericObject
                             && $static_class_type instanceof Type\Atomic\TGenericObject
@@ -1297,7 +1300,9 @@ class ExpressionAnalyzer
 
                     $return_type->value = $parent_class;
                 } else {
-                    $return_type->value = $codebase->classlikes->getUnAliasedName($return_type->value);
+                    $return_type->value = $codebase->classlikes->getUnAliasedName(
+                        $return_type->value
+                    );
                 }
             }
         }
@@ -1313,7 +1318,9 @@ class ExpressionAnalyzer
                 }
 
                 if (strpos($return_type->const_name, '*') !== false) {
-                    $class_storage = $codebase->classlike_storage_provider->get($return_type->fq_classlike_name);
+                    $class_storage = $codebase->classlike_storage_provider->get(
+                        strtolower($return_type->fq_classlike_name)
+                    );
 
                     $matching_constants = \array_keys($class_storage->class_constant_locations);
 
@@ -1952,14 +1959,14 @@ class ExpressionAnalyzer
             if ($atomic_type instanceof TNamedObject
                 && $codebase->methods->methodExists(
                     new \Psalm\Internal\MethodIdentifier(
-                        $atomic_type->value,
+                        strtolower($atomic_type->value),
                         '__tostring'
                     )
                 )
             ) {
                 $return_type = $codebase->methods->getMethodReturnType(
                     new \Psalm\Internal\MethodIdentifier(
-                        $atomic_type->value,
+                        strtolower($atomic_type->value),
                         '__tostring'
                     ),
                     $self_class
@@ -2139,7 +2146,7 @@ class ExpressionAnalyzer
                 if ($clone_type_part instanceof TNamedObject
                     && $codebase->classExists($clone_type_part->value)
                 ) {
-                    $class_storage = $codebase->classlike_storage_provider->get($clone_type_part->value);
+                    $class_storage = $codebase->classlike_storage_provider->get(strtolower($clone_type_part->value));
 
                     if ($class_storage->mutation_free) {
                         $immutable_cloned = true;

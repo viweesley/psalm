@@ -241,7 +241,7 @@ class FunctionCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expressio
                         || !$codebase->classlikes->classOrInterfaceExists($var_type_part->value)
                         || !$codebase->methods->methodExists(
                             new \Psalm\Internal\MethodIdentifier(
-                                $var_type_part->value,
+                                strtolower($var_type_part->value),
                                 '__invoke'
                             )
                         )

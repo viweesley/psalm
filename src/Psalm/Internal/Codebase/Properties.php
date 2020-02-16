@@ -94,7 +94,7 @@ class Properties
             }
         }
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         if (isset($class_storage->declaring_property_ids[$property_name])) {
             $declaring_property_class = $class_storage->declaring_property_ids[$property_name];
@@ -102,19 +102,19 @@ class Properties
             if ($context && $context->calling_function_id) {
                 $this->file_reference_provider->addMethodReferenceToClassMember(
                     $context->calling_function_id,
-                    strtolower($declaring_property_class) . '::$' . $property_name
+                    $declaring_property_class . '::$' . $property_name
                 );
             } elseif ($source) {
                 $this->file_reference_provider->addFileReferenceToClassMember(
                     $source->getFilePath(),
-                    strtolower($declaring_property_class) . '::$' . $property_name
+                    $declaring_property_class . '::$' . $property_name
                 );
             }
 
             if ($this->collect_locations && $code_location) {
                 $this->file_reference_provider->addCallingLocationForClassProperty(
                     $code_location,
-                    strtolower($declaring_property_class) . '::$' . $property_name
+                    $declaring_property_class . '::$' . $property_name
                 );
             }
 
@@ -139,7 +139,7 @@ class Properties
     /**
      * @param  string $property_id
      *
-     * @return string|null
+     * @return lowercase-string|null
      */
     public function getDeclaringClassForProperty($property_id, bool $read_mode, StatementsSource $source = null)
     {
@@ -153,11 +153,11 @@ class Properties
                 $source,
                 null
             )) {
-                return $fq_class_name;
+                return strtolower($fq_class_name);
             }
         }
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         if (isset($class_storage->declaring_property_ids[$property_name])) {
             return $class_storage->declaring_property_ids[$property_name];
@@ -169,7 +169,7 @@ class Properties
      *
      * @param  string $property_id
      *
-     * @return string|null
+     * @return lowercase-string|null
      */
     public function getAppearingClassForProperty($property_id, bool $read_mode, StatementsSource $source = null)
     {
@@ -183,16 +183,16 @@ class Properties
                 $source,
                 null
             )) {
-                return $fq_class_name;
+                return strtolower($fq_class_name);
             }
         }
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         if (isset($class_storage->appearing_property_ids[$property_name])) {
             $appearing_property_id = $class_storage->appearing_property_ids[$property_name];
 
-            return explode('::$', $appearing_property_id)[0];
+            return strtolower(explode('::$', $appearing_property_id)[0]);
         }
     }
 
@@ -208,7 +208,7 @@ class Properties
 
         list($fq_class_name, $property_name) = explode('::$', $property_id);
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         if (isset($class_storage->declaring_property_ids[$property_name])) {
             $declaring_property_class = $class_storage->declaring_property_ids[$property_name];
@@ -252,7 +252,7 @@ class Properties
             }
         }
 
-        $class_storage = $this->classlike_storage_provider->get($fq_class_name);
+        $class_storage = $this->classlike_storage_provider->get(strtolower($fq_class_name));
 
         if (isset($class_storage->declaring_property_ids[$property_name])) {
             $declaring_property_class = $class_storage->declaring_property_ids[$property_name];

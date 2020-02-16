@@ -108,7 +108,7 @@ abstract class ClassLikeAnalyzer extends SourceAnalyzer implements StatementsSou
         $this->file_analyzer = $source->getFileAnalyzer();
         $this->fq_class_name = $fq_class_name;
         $codebase = $source->getCodebase();
-        $this->storage = $codebase->classlike_storage_provider->get($fq_class_name);
+        $this->storage = $codebase->classlike_storage_provider->get(strtolower($fq_class_name));
     }
 
     public function __destruct()
@@ -203,6 +203,7 @@ abstract class ClassLikeAnalyzer extends SourceAnalyzer implements StatementsSou
      * @param  string           $fq_class_name
      * @param  array<string>    $suppressed_issues
      * @param  bool             $inferred - whether or not the type was inferred
+     * @param  lowercase-string $calling_fq_class_name
      *
      * @return bool|null
      */
@@ -318,7 +319,7 @@ abstract class ClassLikeAnalyzer extends SourceAnalyzer implements StatementsSou
         );
 
         try {
-            $class_storage = $codebase->classlike_storage_provider->get($aliased_name);
+            $class_storage = $codebase->classlike_storage_provider->get(strtolower($aliased_name));
         } catch (\InvalidArgumentException $e) {
             if (!$inferred) {
                 throw $e;
@@ -330,7 +331,7 @@ abstract class ClassLikeAnalyzer extends SourceAnalyzer implements StatementsSou
         foreach ($class_storage->invalid_dependencies as $dependency_class_name) {
             // if the implemented/extended class is stubbed, it may not yet have
             // been hydrated
-            if ($codebase->classlike_storage_provider->has($dependency_class_name)) {
+            if ($codebase->classlike_storage_provider->has(strtolower($dependency_class_name))) {
                 continue;
             }
 
@@ -582,7 +583,7 @@ abstract class ClassLikeAnalyzer extends SourceAnalyzer implements StatementsSou
         }
 
         if ($source->getSource() instanceof TraitAnalyzer
-            && strtolower($declaring_property_class) === strtolower((string) $source->getFQCLN())
+            && $declaring_property_class === strtolower((string) $source->getFQCLN())
         ) {
             return $emit_issues ? null : true;
         }

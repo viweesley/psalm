@@ -353,7 +353,7 @@ class ReturnTypeAnalyzer
         $parent_class = null;
 
         if ($self_fq_class_name) {
-            $classlike_storage = $codebase->classlike_storage_provider->get($self_fq_class_name);
+            $classlike_storage = $codebase->classlike_storage_provider->get(strtolower($self_fq_class_name));
             $parent_class = $classlike_storage->parent_class;
         }
 
@@ -839,7 +839,7 @@ class ReturnTypeAnalyzer
         $fqcln = $source->getFQCLN();
 
         if ($fqcln !== null && $function instanceof ClassMethod) {
-            $class_storage = $codebase->classlike_storage_provider->get($fqcln);
+            $class_storage = $codebase->classlike_storage_provider->get(strtolower($fqcln));
             $is_final = $function->isFinal() || $class_storage->final;
         }
 

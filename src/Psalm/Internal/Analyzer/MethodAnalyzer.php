@@ -50,11 +50,9 @@ class MethodAnalyzer extends FunctionLikeAnalyzer
 
         $method_name_lc = strtolower((string) $function->name);
 
-        $source_fqcln = (string) $source->getFQCLN();
+        $source_fqcln_lc = strtolower((string) $source->getFQCLN());
 
-        $source_fqcln_lc = strtolower($source_fqcln);
-
-        $method_id = new \Psalm\Internal\MethodIdentifier($source_fqcln, $method_name_lc);
+        $method_id = new \Psalm\Internal\MethodIdentifier($source_fqcln_lc, $method_name_lc);
 
         if (!$storage) {
             try {
@@ -349,7 +347,7 @@ class MethodAnalyzer extends FunctionLikeAnalyzer
         $declaring_method_class = $declaring_method_id->fq_class_name;
 
         if ($source->getSource() instanceof TraitAnalyzer
-            && strtolower($declaring_method_class) === strtolower((string) $source->getFQCLN())
+            && $declaring_method_class === strtolower((string) $source->getFQCLN())
         ) {
             return null;
         }
@@ -476,7 +474,7 @@ class MethodAnalyzer extends FunctionLikeAnalyzer
         $declaring_method_class = $declaring_method_id->fq_class_name;
 
         if ($source->getSource() instanceof TraitAnalyzer
-            && strtolower($declaring_method_class) === strtolower((string) $source->getFQCLN())
+            && $declaring_method_class === strtolower((string) $source->getFQCLN())
         ) {
             return true;
         }
@@ -540,7 +538,7 @@ class MethodAnalyzer extends FunctionLikeAnalyzer
 
         $implementer_declaring_method_id = $codebase->methods->getDeclaringMethodId(
             new \Psalm\Internal\MethodIdentifier(
-                $implementer_classlike_storage->name,
+                strtolower($implementer_classlike_storage->name),
                 strtolower($guide_method_storage->cased_name ?: '')
             )
         );
@@ -1205,7 +1203,7 @@ class MethodAnalyzer extends FunctionLikeAnalyzer
     }
 
     /**
-     * @param string|null $context_self
+     * @param lowercase-string|null $context_self
      *
      * @return \Psalm\Internal\MethodIdentifier
      */
@@ -1214,7 +1212,7 @@ class MethodAnalyzer extends FunctionLikeAnalyzer
         $function_name = (string)$this->function->name;
 
         return new \Psalm\Internal\MethodIdentifier(
-            $context_self ?: (string) $this->source->getFQCLN(),
+            $context_self ?: strtolower((string) $this->source->getFQCLN()),
             strtolower($function_name)
         );
     }

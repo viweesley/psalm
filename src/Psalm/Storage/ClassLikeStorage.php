@@ -307,7 +307,7 @@ class ClassLikeStorage
     public $pseudo_property_get_types = [];
 
     /**
-     * @var array<string, string>
+     * @var array<string, lowercase-string>
      */
     public $declaring_property_ids = [];
 

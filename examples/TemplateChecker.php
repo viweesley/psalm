@@ -44,7 +44,7 @@ class TemplateAnalyzer extends Psalm\Internal\Analyzer\FileAnalyzer
                     throw new \InvalidArgumentException('Could not interpret doc comment correctly');
                 }
 
-                $method_id = new \Psalm\Internal\MethodIdentifier(...explode('::', $matches[1]));
+                $method_id = new \Psalm\Internal\MethodIdentifier(...explode('::', strtolower($matches[1])));
 
                 $this_params = $this->checkMethod($method_id, $first_stmt, $codebase);
 
@@ -61,7 +61,7 @@ class TemplateAnalyzer extends Psalm\Internal\Analyzer\FileAnalyzer
         if (!$this_params) {
             $this_params = new Context();
             $this_params->check_variables = false;
-            $this_params->self = self::VIEW_CLASS;
+            $this_params->self = strtolower(self::VIEW_CLASS);
             $this_params->vars_in_scope['$this'] = new Type\Union([
                 new Type\Atomic\TNamedObject(self::VIEW_CLASS),
             ]);

@@ -14,6 +14,7 @@ use function reset;
 use function strpos;
 use function strval;
 use function substr;
+use function strtolower;
 
 class UnionTemplateHandler
 {
@@ -326,7 +327,7 @@ class UnionTemplateHandler
 
                 try {
                     $classlike_storage =
-                        $codebase->classlike_storage_provider->get($atomic_input_type->value);
+                        $codebase->classlike_storage_provider->get(strtolower($atomic_input_type->value));
 
                     if ($atomic_input_type instanceof Atomic\TGenericObject
                         && isset($classlike_storage->template_type_extends[$atomic_type->value])
@@ -444,7 +445,8 @@ class UnionTemplateHandler
                     }
 
                     if ($replacement_atomic_type instanceof Atomic\TTemplateParam
-                        && $replacement_atomic_type->defining_class !== $calling_class
+                        && (!$calling_class
+                            || strtolower($replacement_atomic_type->defining_class) !== strtolower($calling_class))
                         && $replacement_atomic_type->defining_class !== 'fn-' . $calling_function
                     ) {
                         foreach ($replacement_atomic_type->as->getAtomicTypes() as $nested_type_atomic) {
